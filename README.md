@@ -11,14 +11,15 @@
 8. [Mengubah Resolusi, Rasio, dan Rotasi](#8-mengubah-resolusi-rasio-dan-rotasi)
 9. [Mengelola Audio](#9-mengelola-audio)
 10. [Ekstrak Gambar/Thumbnail dari Video](#10-ekstrak-gambarthumbnail-dari-video)
-11. [Membuat Video dari Kumpulan Gambar](#11-membuat-video-dari-kumpulan-gambar)
-12. [Menambahkan Watermark, Teks, dan Subtitle](#12-menambahkan-watermark-teks-dan-subtitle)
-13. [Filter Video Populer](#13-filter-video-populer)
-14. [Streaming & Merekam](#14-streaming--merekam)
-15. [Optimasi Video untuk YouTube](#15-optimasi-video-untuk-youtube)
-16. [Tips Mempercepat Proses (Hardware Acceleration)](#16-tips-mempercepat-proses-hardware-acceleration)
-17. [Troubleshooting Umum](#17-troubleshooting-umum)
-18. [Referensi Cepat (Cheat Sheet)](#18-referensi-cepat-cheat-sheet)
+11. [Ekstrak subtitle dari video (kalau video punya subtitle track)](#11-ekstrak-subtitle-dari-video)
+12. [Membuat Video dari Kumpulan Gambar](#11-membuat-video-dari-kumpulan-gambar)
+13. [Menambahkan Watermark, Teks, dan Subtitle](#12-menambahkan-watermark-teks-dan-subtitle)
+14. [Filter Video Populer](#13-filter-video-populer)
+15. [Streaming & Merekam](#14-streaming--merekam)
+16. [Optimasi Video untuk YouTube](#15-optimasi-video-untuk-youtube)
+17. [Tips Mempercepat Proses (Hardware Acceleration)](#16-tips-mempercepat-proses-hardware-acceleration)
+18. [Troubleshooting Umum](#17-troubleshooting-umum)
+19. [Referensi Cepat (Cheat Sheet)](#18-referensi-cepat-cheat-sheet)
 
 ---
 
@@ -261,7 +262,42 @@ ffmpeg -i input.mp4 -vf fps=1 frame_%04d.jpg
 
 ---
 
-## 11. Membuat Video dari Kumpulan Gambar
+## 11. Ekstrak subtitle dari video (kalau video punya subtitle track)
+
+**Cek dulu apakah videonya punya subtitle:**
+
+```bash
+ffmpeg -i input.mp4
+```
+
+Lihat bagian Stream — kalau ada baris seperti Stream #0:2(eng): Subtitle: subrip atau mov_text, berarti ada subtitle track.
+
+**Ekstrak subtitle ke file `.srt`:**
+
+```bash
+ffmpeg -i input.mp4 -map 0:s:0 subtitle.srt
+```
+
+`0:s:0` artinya subtitle track pertama (index 0) dari file input.
+
+**Kalau videonya punya lebih dari satu subtitle (misal beberapa bahasa):**
+
+```bash
+ffmpeg -i input.mp4
+```
+**Cek nomor stream-nya dulu (misal 0:s:0 untuk bahasa Inggris, 0:s:1 untuk bahasa Indonesia), lalu:**
+
+```bash
+ffmpeg -i input.mp4 -map 0:s:1 subtitle_id.srt
+```
+**Kalau formatnya bitmap-based subtitle (misal dari file MKV, format PGS/VobSub), tidak bisa langsung diubah ke .srt karena bukan berbasis teks — harus di-OCR dulu pakai tool lain seperti SubtitleEdit. Tapi bisa diekstrak dulu ke format aslinya:**
+
+```bash
+ffmpeg -i input.mkv -map 0:s:0 subtitle.sup
+```
+Kalau videonya tidak punya subtitle track sama sekali, FFmpeg akan menampilkan error seperti Stream map '0:s:0' matches no streams — berarti subtitle-nya (kalau ada teks di video) sudah hardcode/menempel di gambar, jadi tidak bisa diekstrak sebagai teks.
+
+## 12. Membuat Video dari Kumpulan Gambar
 
 **Slideshow dari sekumpulan gambar (misal frame_001.jpg, frame_002.jpg, dst):**
 ```bash
@@ -276,7 +312,7 @@ ffmpeg -i input.mp4 -vf "fps=10,scale=480:-1:flags=lanczos" output.gif
 
 ---
 
-## 12. Menambahkan Watermark, Teks, dan Subtitle
+## 13. Menambahkan Watermark, Teks, dan Subtitle
 
 **Menambahkan watermark gambar/logo (posisi pojok kanan bawah):**
 ```bash
@@ -300,7 +336,7 @@ ffmpeg -i input.mp4 -i subtitle.srt -c copy -c:s mov_text output.mp4
 
 ---
 
-## 13. Filter Video Populer
+## 14. Filter Video Populer
 
 | Kebutuhan | Perintah filter (`-vf`) |
 |---|---|
@@ -322,7 +358,7 @@ ffmpeg -i input.mp4 -vf "setpts=0.5*PTS" -af "atempo=2.0" output.mp4
 
 ---
 
-## 14. Streaming & Merekam
+## 15. Streaming & Merekam
 
 **Streaming ke platform (misal RTMP, contoh generik untuk YouTube Live/sejenisnya):**
 ```bash
@@ -346,7 +382,7 @@ ffmpeg -f avfoundation -i "1" output.mp4
 
 ---
 
-## 15. Optimasi Video untuk YouTube
+## 16. Optimasi Video untuk YouTube
 
 Pengaturan yang direkomendasikan YouTube untuk hasil upload optimal (H.264, kualitas tinggi, ukuran wajar):
 
@@ -370,7 +406,7 @@ ffmpeg -i input.mp4 -c:v libx264 -preset medium -crf 21 -pix_fmt yuv420p -c:a aa
 
 ---
 
-## 16. Tips Mempercepat Proses (Hardware Acceleration)
+## 17. Tips Mempercepat Proses (Hardware Acceleration)
 
 Jika perangkat mendukung, gunakan encoder berbasis GPU agar proses jauh lebih cepat dibanding encoder software (CPU):
 
@@ -398,7 +434,7 @@ ffmpeg -i input.mp4 -c:v h264_videotoolbox -b:v 5M output.mp4
 
 ---
 
-## 17. Troubleshooting Umum
+## 18. Troubleshooting Umum
 
 | Masalah | Penyebab & Solusi |
 |---|---|
@@ -411,7 +447,7 @@ ffmpeg -i input.mp4 -c:v h264_videotoolbox -b:v 5M output.mp4
 
 ---
 
-## 18. Referensi Cepat (Cheat Sheet)
+## 19. Referensi Cepat (Cheat Sheet)
 
 ```bash
 # Info file
