@@ -262,7 +262,7 @@ ffmpeg -i input.mp4 -vf fps=1 frame_%04d.jpg
 
 ---
 
-## 11. Ekstrak subtitle dari video (kalau video punya subtitle track)
+## 11. Ekstrak subtitle dari video
 
 **Cek dulu apakah videonya punya subtitle:**
 
